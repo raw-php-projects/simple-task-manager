@@ -1,17 +1,20 @@
 <?php
+// Include and connect databae
 include "config.php";
 $connection = @mysqli_connect( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
 
+// Check if database connectd else throw an error
 if ( !$connection ) {
     throw new Exception( "Database Connection Failed" );
 } else {
+    // Check if there is a form action otherwise redirect
     $action = $_POST['action'] ?? '';
     if ( !$action ) {
         header( "Location: index.php" );
         die();
     } else {
         if( 'add' == $action ){
-            // Insert Task
+            // Insert/Add Task
             $title = $_POST['title'];
             $date  = $_POST['date'];
 
@@ -44,7 +47,26 @@ if ( !$connection ) {
                 mysqli_query($connection, $delete);
             }
             header( "Location: index.php" );
+        }else if ( 'bulkcomplete' == $action ) {
+            // Bulk Complete tasks            
+            $taskIds = $_POST['taskids'];
+            $_taskIds = join(",", $taskIds );
+            if( !empty($_taskIds) ){
+                $update = "UPDATE tasks SET complete=1 WHERE id in ($_taskIds)";
+                mysqli_query($connection, $update);
+            }
+            header( "Location: index.php" );
+        }else if ( 'bulkdelete' == $action ) {
+            // Bulk Delete task            
+            $taskIds = $_POST['taskids'];
+            $_taskIds = join(",", $taskIds );
+            if( !empty($_taskIds) ){
+                $delete = "DELETE FROM tasks WHERE id in ($_taskIds)";
+                mysqli_query($connection, $delete);
+            }
+            header( "Location: index.php" );
         }
     }
 }
+// Close database connection
 mysqli_close( $connection );

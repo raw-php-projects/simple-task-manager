@@ -1,16 +1,18 @@
 <?php
-
 // Database conection
 include "config.php";
 $connection = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
+// Check if database connectd else throw an error
 if( !$connection ){
     throw new Exception("Database not connected");
 }
 
+// Select all in completed tasks
 $query = "SELECT * FROM tasks WHERE complete = 0 ORDER BY date DESC";
 $results = mysqli_query($connection, $query);
 
+// Select all completed tasks
 $queryCompleteTask = "SELECT * FROM tasks WHERE complete = 1 ORDER BY date DESC";
 $completeResults = mysqli_query($connection, $queryCompleteTask);
 ?>
@@ -43,6 +45,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
     <p>This is a sample project for managing our daily tasks. We're going to use HTML, CSS, PHP, JavaScript and MySQL
         for this project</p>
 
+    <!-- Completed Tasks -->
     <?php if( mysqli_num_rows($completeResults) > 0 ){ ?>
         <h4>Complete Task</h4>
         <table>
@@ -56,7 +59,8 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
             </tr>
             </thead>
             <tbody>
-                <?php 
+                <?php
+                    // Query Completed Taks
                     while( $completeTaskData = mysqli_fetch_assoc($completeResults) ){ 
                     $timestamp = strtotime( $completeTaskData['date'] );
                     $completeDate = date( 'jS M, Y', $timestamp );
@@ -79,43 +83,50 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
         if( mysqli_num_rows($results) == 0 ){
             echo "<h4>Upcoming Task</h4><p>No task found</p>";
         }else{
-    ?>
-        <table>
-            <thead>
-            <tr>
-                <th></th>
-                <th>Id</th>
-                <th>Task</th>
-                <th>Date</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-                <?php 
-                    while( $data = mysqli_fetch_assoc($results) ){ 
-                    $timestamp = strtotime( $data['date'] );
-                    $date = date( 'jS M, Y', $timestamp );
-                ?>
+    ?>  
+        <hr>
+        <h4>Upcoming Task</h4>
+        <form action="tasks.php" method="post">
+            <table>
+                <thead>
                 <tr>
-                    <td><input class="label-inline" type="checkbox" value="<?php echo $data['id']; ?>"></td>
-                    <td><?php echo $data['id']; ?></td>
-                    <td><?php echo $data['title']; ?></td>
-                    <td><?php echo $date; ?></td>
-                    <td><a class="delete" data-taskid="<?php echo $data['id']; ?>" href='#'>Delete</a> | <a class="complete" data-taskid="<?php echo $data['id']; ?>" href="#">Complete</a>
-                    </td>
+                    <th></th>
+                    <th>Id</th>
+                    <th>Task</th>
+                    <th>Date</th>
+                    <th>Action</th>
                 </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-        <select id="action" name="action" >
-            <option value="0">With Selected</option>
-            <option value="bulkdelete">Delete</option>
-            <option value="bulkcomplete">Mark As Complete</option>
-        </select>
-        <input class="button-primary" id="bulksubmit" type="submit" value="Submit">
+                </thead>
+                <tbody>
+                    <?php 
+                        // Query In Completed Taks
+                        while( $data = mysqli_fetch_assoc($results) ){ 
+                        $timestamp = strtotime( $data['date'] );
+                        $date = date( 'jS M, Y', $timestamp );
+                    ?>
+                    <tr>
+                        <td><input name="taskids[]" class="label-inline" type="checkbox" value="<?php echo $data['id']; ?>"></td>
+                        <td><?php echo $data['id']; ?></td>
+                        <td><?php echo $data['title']; ?></td>
+                        <td><?php echo $date; ?></td>
+                        <td><a class="delete" data-taskid="<?php echo $data['id']; ?>" href='#'>Delete</a> | <a class="complete" data-taskid="<?php echo $data['id']; ?>" href="#">Complete</a>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+            <select id="action" name="action" >
+                <option value="0">With Selected</option>
+                <option value="bulkdelete">Delete</option>
+                <option value="bulkcomplete">Mark As Complete</option>
+            </select>
+            <input class="button-primary" id="bulksubmit" type="submit" value="Submit">
+        </form>
     <?php } ?>
+
+    <!-- Add Task Form-->
     <p>..................</p>
-    <h4>Add Tasks</h4>
+    <h4>Add Task</h4>
     <?php
         if ( !empty( $_GET['added'] ) ) {
             $added = $_GET['added'];
@@ -153,34 +164,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
 </form>
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
-<script>
-    ;(function($){
-        $(document).ready(function(){
-            // Complete the task
-            $(".complete").on('click', function(){
-                let id = $(this).data('taskid');
-                $("#complete-task-id").val(id);
-                $("#complete-task").submit();
-            });
-
-            // In Complete the task
-            $(".incomplete").on('click', function(){
-                let id = $(this).data('taskid');
-                $("#in-complete-task-id").val(id);
-                $("#in-complete-task").submit();
-            });
-
-            // In Complete the task
-            $(".delete").on('click', function(){
-                if( confirm("Are you sure to delete the task?") ){
-                    let id = $(this).data('taskid');
-                    $("#delete-task-id").val(id);
-                    $("#delete-task").submit();
-                };
-            });
-        });
-    })(jQuery);
-</script>
+<script src="./assets/js/task.js"></script>
 </body>
 
 </html>
