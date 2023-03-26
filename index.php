@@ -66,7 +66,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
                     <td><?php echo $completeTaskData['id']; ?></td>
                     <td><?php echo $completeTaskData['title']; ?></td>
                     <td><?php echo $completeDate; ?></td>
-                    <td><a class="delete" data-taskid="" href='#'>Delete</a> | <a class="incomplete" data-taskid="<?php echo $data['id']; ?>" href="#">Mar Incomplete</a>
+                    <td><a class="delete" data-taskid="<?php echo $completeTaskData['id']; ?>" href='#'>Delete</a> | <a class="incomplete" data-taskid="<?php echo $completeTaskData['id']; ?>" href="#">Mark Incomplete</a>
                     </td>
                 </tr>
                 <?php } ?>
@@ -77,10 +77,9 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
     <!-- Upcoming Task -->
     <?php 
         if( mysqli_num_rows($results) == 0 ){
-            echo "<p>No task found</p>";
+            echo "<h4>Upcoming Task</h4><p>No task found</p>";
         }else{
     ?>
-        <h4>Upcoming Task</h4>
         <table>
             <thead>
             <tr>
@@ -102,7 +101,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
                     <td><?php echo $data['id']; ?></td>
                     <td><?php echo $data['title']; ?></td>
                     <td><?php echo $date; ?></td>
-                    <td><a class="delete" data-taskid="" href='#'>Delete</a> | <a class="complete" data-taskid="<?php echo $data['id']; ?>" href="#">Complete</a>
+                    <td><a class="delete" data-taskid="<?php echo $data['id']; ?>" href='#'>Delete</a> | <a class="complete" data-taskid="<?php echo $data['id']; ?>" href="#">Complete</a>
                     </td>
                 </tr>
                 <?php } ?>
@@ -135,18 +134,49 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
         </form>
     </div>
 
+<!-- Task Complete form /hidden -->
 <form action="tasks.php" method="post" id="complete-task">
     <input type="hidden" id="caction" name="action" value="complete">
     <input type="hidden" id="complete-task-id" name="completeTaskId">
 </form>
+
+<!-- Task In Complete form /hidden -->
+<form action="tasks.php" method="post" id="in-complete-task">
+    <input type="hidden" id="in-complete-action" name="action" value="incomplete">
+    <input type="hidden" id="in-complete-task-id" name="inCompleteTaskId">
+</form>
+
+<!-- Task Delete form /hidden -->
+<form action="tasks.php" method="post" id="delete-task">
+    <input type="hidden" id="delete-action" name="action" value="delete">
+    <input type="hidden" id="delete-task-id" name="deleteTaskId">
+</form>
+
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
 <script>
     ;(function($){
         $(document).ready(function(){
+            // Complete the task
             $(".complete").on('click', function(){
                 let id = $(this).data('taskid');
                 $("#complete-task-id").val(id);
                 $("#complete-task").submit();
+            });
+
+            // In Complete the task
+            $(".incomplete").on('click', function(){
+                let id = $(this).data('taskid');
+                $("#in-complete-task-id").val(id);
+                $("#in-complete-task").submit();
+            });
+
+            // In Complete the task
+            $(".delete").on('click', function(){
+                if( confirm("Are you sure to delete the task?") ){
+                    let id = $(this).data('taskid');
+                    $("#delete-task-id").val(id);
+                    $("#delete-task").submit();
+                };
             });
         });
     })(jQuery);
