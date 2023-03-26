@@ -66,7 +66,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
                     <td><?php echo $completeTaskData['id']; ?></td>
                     <td><?php echo $completeTaskData['title']; ?></td>
                     <td><?php echo $completeDate; ?></td>
-                    <td><a class="delete" data-taskid="" href='#'>Delete</a>
+                    <td><a class="delete" data-taskid="" href='#'>Delete</a> | <a class="incomplete" data-taskid="<?php echo $data['id']; ?>" href="#">Mar Incomplete</a>
                     </td>
                 </tr>
                 <?php } ?>
@@ -74,6 +74,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
         </table>
     <?php } ?>
     
+    <!-- Upcoming Task -->
     <?php 
         if( mysqli_num_rows($results) == 0 ){
             echo "<p>No task found</p>";
@@ -101,7 +102,7 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
                     <td><?php echo $data['id']; ?></td>
                     <td><?php echo $data['title']; ?></td>
                     <td><?php echo $date; ?></td>
-                    <td><a class="delete" data-taskid="" href='#'>Delete</a> | <a class="incomplete" href='#'>Complete</a>
+                    <td><a class="delete" data-taskid="" href='#'>Delete</a> | <a class="complete" data-taskid="<?php echo $data['id']; ?>" href="#">Complete</a>
                     </td>
                 </tr>
                 <?php } ?>
@@ -134,8 +135,22 @@ $completeResults = mysqli_query($connection, $queryCompleteTask);
         </form>
     </div>
 
-
+<form action="tasks.php" method="post" id="complete-task">
+    <input type="hidden" id="caction" name="action" value="complete">
+    <input type="hidden" id="complete-task-id" name="completeTaskId">
+</form>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+<script>
+    ;(function($){
+        $(document).ready(function(){
+            $(".complete").on('click', function(){
+                let id = $(this).data('taskid');
+                $("#complete-task-id").val(id);
+                $("#complete-task").submit();
+            });
+        });
+    })(jQuery);
+</script>
 </body>
 
 </html>

@@ -1,23 +1,34 @@
 <?php
 include "config.php";
-$action = $_POST['action'] ?? '';
+$connection = mysqli_connect( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
 
-if ( !$action ) {
-    header( "Location: index.php" );
+if ( !$connection ) {
+    throw new Exception( "Database Connection Failed" );
 } else {
-
-    $connection = mysqli_connect( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
-    if ( !$connection ) {
-        throw new Exception( "Database Connection Failed" );
+    $action = $_POST['action'] ?? '';
+    if ( !$action ) {
+        header( "Location: index.php" );
+        die();
     } else {
-        $title = $_POST['title'];
-        $date  = $_POST['date'];
+        // Insert Task
+        if( 'add' == $action ){
+            $title = $_POST['title'];
+            $date  = $_POST['date'];
 
-        if ( $title && $date ) {
-            $query = "INSERT INTO tasks (title, date) VALUE ('$title', '$date')";
-            mysqli_query( $connection, $query );
-            header( "Location: index.php?added=true" );
+            if ( $title && $date ) {
+                $query = "INSERT INTO tasks (title, date) VALUE ('$title', '$date')";
+                mysqli_query( $connection, $query );
+                mysqli_close($connection);
+                header( "Location: index.php?added=true" );
+            }
+        }elseif( 'complete' == $action ){
+            $taskId = $_POST['completeTaskId'];
+            if( $taskId ){
+                $update = "UPDATE tasks SET complete=1 WHERE id={$taskId} LIMIT 1";
+                mysqli_query($connection, $update);
+                mysqli_close($connection);
+            }
+            header( "Location: index.php" );
         }
-        mysqli_close($connection);
     }
 }
